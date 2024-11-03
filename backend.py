@@ -13,9 +13,6 @@ def importMainfest(filename, sheet_name="Sheet1"):
     except FileNotFoundError:
         print("THe file was not found.")
 
-exc = importMainfest("Testsheet.xlsx", "Sheet1")
-print(exc.head())
-
 
 
 #def trailerDimenions():
