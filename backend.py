@@ -3,7 +3,7 @@ import sys
 import tkinter
 import pandas as pd
 
-def importMainfest(filename, sheet_name="Sheet1"):
+def importManifest(filename, sheet_name="Sheet1"):
     #This function will import the data from the manifest via spreadsheet.
     try:
         data = pd.read_excel(filename, sheet_name=sheet_name)

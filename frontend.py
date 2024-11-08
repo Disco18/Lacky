@@ -22,34 +22,47 @@ def open_file_dialog():
     if filename:
         data = backend.importManifest(filename)
 
-        if data is not None:
-            return show_manifest_data
+        if 'id' not in data.columns:
+            print("No 'id' column found in the spreadsheet.").pack()
+        
+        else:
+            if data is not None:
+                show_manifest_data(data)
 
 def button_upload_clicked():
     newWindow = Toplevel(window)
     newWindow.title("Upload")
     newWindow.geometry("400x200")
-    #frame1 = Toplevel.frame(root, width=400, height=200)
-    #frame1.grid(row=0, column=0)
     Label(newWindow, text="Drag and drop .csv file here!").pack()
-    Label.bind("<Button-1>", lambda event: open_file_dialog())
+    newWindow.bind("<Button-1>", lambda event: open_file_dialog())
 
 def show_manifest_data(data):
     data_window = Toplevel(window)
     data_window.title("Manifest")
 
-    tree = ttk.Treeview(data_window)
-    tree["columns"] = list(data.columns)
-    tree["show"] = "headings"
+    if 'id' not in data.columns:
+        Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
+        return
+    
+    id_data = data['id'].dropna().tolist()
+    #Sets the grid size based on the manifest. Probably change this to a set value based on the trailer size.
+    grid_size = int(len(id_data) ** 0.5) + 1
 
-    for col in data.columns:
-        tree.heading(col, text=col)
-        tree.column(col, anchor="center")
+    for i, value in enumerate(id_data):
+        row = i // grid_size
+        col = i % grid_size
+        label = Label(data_window, text=str(value), width=10, height=5, relief="solid", bg="lightblue")
+        label.grid(row=row, column=col, padx=4, pady=4)
 
-    for _, row in data.iterrows():
-        tree.insert("", "end", values=list(row))
+#this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
+#in a pop up window when a populated grid square clicked.
+def display_manifest_data(data):
+    popup = Toplevel(window)
+    popup.title("Information")
 
-    tree.pack(expand=True, fill="both")
+    for idx, (col, val) in enumerate(row_data.items()):
+        tk.Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
+
 
 
 #def print_window():
@@ -70,5 +83,7 @@ button_upload.pack(pady=10)
 button_clp.pack(pady=10)
 button_print.pack(pady=10)
 button_quit.pack(pady=10)
+
+
 
 window.mainloop()
