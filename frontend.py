@@ -44,24 +44,31 @@ def show_manifest_data(data):
         Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
         return
     
-    id_data = data['id'].dropna().tolist()
+    id_data = data.dropna(subset=['id']).reset_index(drop=True)
+    
     #Sets the grid size based on the manifest. Probably change this to a set value based on the trailer size.
     grid_size = int(len(id_data) ** 0.5) + 1
 
-    for i, value in enumerate(id_data):
+    for i, (_, row) in enumerate(id_data.iterrows()):
+        row_data = row.to_dict()
+        row_id = row_data['id']
         row = i // grid_size
         col = i % grid_size
-        label = Label(data_window, text=str(value), width=10, height=5, relief="solid", bg="lightblue")
+
+        #creates the face for the grid using the labels.
+        label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightblue")
         label.grid(row=row, column=col, padx=4, pady=4)
+
+        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
 
 #this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
 #in a pop up window when a populated grid square clicked.
-def display_manifest_data(data):
+def display_manifest_data(row_data):
     popup = Toplevel(window)
     popup.title("Information")
 
     for idx, (col, val) in enumerate(row_data.items()):
-        tk.Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
+        Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
 
 
 
