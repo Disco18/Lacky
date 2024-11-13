@@ -21,45 +21,63 @@ def open_file_dialog():
 
     if filename:
         data = backend.importManifest(filename)
-
-        if 'id' not in data.columns:
-            print("No 'id' column found in the spreadsheet.").pack()
-        
-        else:
-            if data is not None:
-                show_manifest_data(data)
+        if data is not None:
+            choose_transport_setup(data)
 
 def button_upload_clicked():
     newWindow = Toplevel(window)
     newWindow.title("Upload")
     newWindow.geometry("400x200")
     Label(newWindow, text="Drag and drop .csv file here!").pack()
-    newWindow.bind("<Button-1>", lambda event: open_file_dialog())
+    newWindow.bind("<Button-1>", lambda event: open_file_dialog()[newWindow.destroy()])
 
-def show_manifest_data(data):
+def show_manifest_data(data, grid_dimensions):
     data_window = Toplevel(window)
     data_window.title("Manifest")
+
+    #Added a label to tell the user which side of the graph they are viewing.
+    #columnspan will make sure that the loading grid is placed below this label.
+    ds_label = Label(data_window, text="Driver Side", font=("Ariel", 14, "bold"), fg="darkblue")
+    ds_label.grid(row=0, column=0, columnspan=grid_dimensions[1], pady=10)
 
     if 'id' not in data.columns:
         Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
         return
     
     id_data = data.dropna(subset=['id']).reset_index(drop=True)
+    rows, cols = grid_dimensions
+    total_cells = rows * cols
     
-    #Sets the grid size based on the manifest. Probably change this to a set value based on the trailer size.
-    grid_size = int(len(id_data) ** 0.5) + 1
+    #Creates the grid of labels for each ID to the choosen transport setup.
+    #This should stop the grid creation to the size set in the TRANSPORT_SETUP.
+    for i in range(total_cells):
+        r = (i // cols) + 1
+        c = i % cols
 
-    for i, (_, row) in enumerate(id_data.iterrows()):
-        row_data = row.to_dict()
-        row_id = row_data['id']
-        row = i // grid_size
-        col = i % grid_size
+        if i < len(id_data):
+            row_data = id_data.iloc[i].to_dict()
+            row_id = row_data['id']
+            #creates the face for the grid using the labels.
+            label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightgreen")
+            label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+        else:
+            label = Label (data_window, text="Empty", width=10, height=5, relief="solid", bg="lightblue")
 
-        #creates the face for the grid using the labels.
-        label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightblue")
-        label.grid(row=row, column=col, padx=4, pady=4)
+        label.grid(row=r, column=c, padx=4, pady=4)
 
-        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+def choose_transport_setup(data):
+    setup_window = Toplevel(window)
+    setup_window.title("Select Transport Setup")
+    setup_window.geometry("400x400")
+
+    Label(setup_window, text="Please select a transport setup:").pack(pady=5)
+    for setup_name, dimensions in backend.TRANSPORT_SETUP.items():
+        btn = Button(
+            setup_window,
+            text=setup_name,
+            command=lambda d=dimensions: [setup_window.destroy(), show_manifest_data(data, d)]
+        )
+        btn.pack(pady=3)
 
 #this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
 #in a pop up window when a populated grid square clicked.
