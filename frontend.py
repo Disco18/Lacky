@@ -35,27 +35,46 @@ def show_manifest_data(data, grid_dimensions):
     data_window = Toplevel(window)
     data_window.title("Manifest")
 
+    rows, cols = grid_dimensions
+    total_cells = rows * cols
+
     #Added a label to tell the user which side of the graph they are viewing.
     #columnspan will make sure that the loading grid is placed below this label.
     ds_label = Label(data_window, text="Driver Side", font=("Ariel", 14, "bold"), fg="darkblue")
-    ds_label.grid(row=0, column=0, columnspan=grid_dimensions[1], pady=10)
-
+    ds_label.grid(row=0, column=0, columnspan=cols, pady=10)
+    ps_label = Label(data_window, text="Passenger Side", font=("Arial", 14, "bold"), fg="darkblue")
+    ps_label.grid(row=rows + 2, column=0, columnspan=cols, pady=10)
+    
     if 'id' not in data.columns:
         Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
         return
     
     id_data = data.dropna(subset=['id']).reset_index(drop=True)
-    rows, cols = grid_dimensions
-    total_cells = rows * cols
-    
+
     #Creates the grid of labels for each ID to the choosen transport setup.
     #This should stop the grid creation to the size set in the TRANSPORT_SETUP.
     for i in range(total_cells):
-        r = (i // cols) + 1
+        r = (i // cols) + 1 #+1 to place grid below labels
         c = i % cols
 
         if i < len(id_data):
             row_data = id_data.iloc[i].to_dict()
+            row_id = row_data['id']
+            #creates the face for the grid using the labels.
+            label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightgreen")
+            label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+        else:
+            label = Label (data_window, text="Empty", width=10, height=5, relief="solid", bg="lightblue")
+
+        label.grid(row=r, column=c, padx=4, pady=4)
+
+    #Passenger grid
+    for i in range(total_cells):
+        r = (i // cols) + rows + 3
+        c = i % cols
+
+        if i + total_cells < len(id_data):
+            row_data = id_data.iloc[i + total_cells].to_dict()
             row_id = row_data['id']
             #creates the face for the grid using the labels.
             label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightgreen")
