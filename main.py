@@ -2,6 +2,3 @@
 import sys
 import backend
 import frontend
-import login
-
-login ()
