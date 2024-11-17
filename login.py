@@ -26,9 +26,9 @@ def login():
 root = Tk()
 root.title("Lacky Login")
 root.geometry("800x500")
-root.configure(bg="purple")
+root.configure(bg="lightgrey")
 
-title_label = Label(root, text="Welcome to Lacky", font=("Arial", 20, "bold"), bg="purple", fg="white")
+title_label = Label(root, text="Welcome to Lacky", font=("Arial", 20, "bold"), bg="lightgrey", fg="black")
 title_label.pack(pady=10)
 
 un_label = Label(root, text="Username:", font=("Arial", 12), fg="black")
