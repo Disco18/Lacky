@@ -9,6 +9,7 @@ from frontend import open_frontend
 USER_DB = {
     "Admin": "Readyfireaim",
     "testuser": "password123",
+    "t": "t",
 }
 
 def login(root, un_entry, ps_entry):

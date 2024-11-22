@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import filedialog, ttk
+from tkinter import filedialog
 from tkinter.scrolledtext import ScrolledText
 import backend
 
@@ -30,14 +30,45 @@ def open_frontend():
         newWindow.title("Upload")
         newWindow.geometry("400x200")
         Label(newWindow, text="Drag and drop .csv file here!").pack()
-        newWindow.bind("<Button-1>", lambda event: open_file_dialog()[newWindow.destroy()])
+        newWindow.bind("<Button-1>", lambda event: (open_file_dialog(), newWindow.destroy()))
+
+    def assign_freight(data, grid_dimensions):
+        rows, cols = grid_dimensions
+        total_cells = rows * cols * 2
+
+        required_columns = ["id", "height", "weight"]
+        if not all(col in data.columns for col in required_columns):
+            print(f"Missing required columns: {set(required_columns) - set(data.columns)}")
+            return [["" for _ in range(cols)] for _ in range(rows * 2)]
+
+        
+        sorted_data = data.sort_values(by=["height", "weight"], ascending=[False, False]).reset_index(drop=True)
+
+        grid = [["" for _ in range(cols)] for _ in range(rows * 2)]
+
+        assigned_data = sorted_data.head(total_cells)
+        for i, (_, row) in enumerate(assigned_data.iterrows()):
+            layer = i // (rows * cols)
+            position = i % (rows * cols)
+            r = position // cols
+            c = cols - 1 - (position % cols) #Assigns from right to left
+
+            grid[r + (layer * rows)][c] = str(row["id"])
+
+        print("Assigned Freight Grid:")
+        for row in grid:
+            print(row)
+
+        return grid
 
     def show_manifest_data(data, grid_dimensions):
         data_window = Toplevel(window)
         data_window.title("Manifest")
 
         rows, cols = grid_dimensions
-        total_cells = rows * cols
+        grid = assign_freight(data, grid_dimensions)
+
+        print("Grid Dimensions:", len(grid), "rows,", len(grid[0]), "cols")
 
         #Added a label to tell the user which side of the graph they are viewing.
         #columnspan will make sure that the loading grid is placed below this label.
@@ -50,40 +81,48 @@ def open_frontend():
             Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
             return
         
-        id_data = data.dropna(subset=['id']).reset_index(drop=True)
+        #id_data = data.dropna(subset=['id']).reset_index(drop=True)
 
         #Creates the grid of labels for each ID to the choosen transport setup.
         #This should stop the grid creation to the size set in the TRANSPORT_SETUP.
-        for i in range(total_cells):
-            r = (i // cols) + 1 #+1 to place grid below labels
-            c = i % cols
-
-            if i < len(id_data):
-                row_data = id_data.iloc[i].to_dict()
-                row_id = row_data['id']
-                #creates the face for the grid using the labels.
-                label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightgreen")
-                label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
-            else:
-                label = Label (data_window, text="Empty", width=10, height=5, relief="solid", bg="lightblue")
-
-            label.grid(row=r, column=c, padx=4, pady=4)
+        for r in range(rows):
+            for c in range(cols):
+                cell_id = grid[r][c]
+                label = Label(
+                    data_window,
+                    text=cell_id if cell_id else "Empty",
+                    width=10,
+                    height=5,
+                    relief="solid",
+                    bg="lightgreen" if cell_id else "lightblue"
+                )
+                if cell_id:
+                    try:
+                        row_data = data.loc[data["id"].astype(str) == str(cell_id)].iloc[0].to_dict()
+                        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+                    except IndexError:
+                        print(f"No data found for ID: {cell_id}")
+                label.grid(row=r + 1, column=c, padx=4, pady=4)
 
         #Passenger grid
-        for i in range(total_cells):
-            r = (i // cols) + rows + 3
-            c = i % cols
-
-            if i + total_cells < len(id_data):
-                row_data = id_data.iloc[i + total_cells].to_dict()
-                row_id = row_data['id']
-                #creates the face for the grid using the labels.
-                label = Label(data_window, text=str(row_id), width=10, height=5, relief="solid", bg="lightgreen")
-                label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
-            else:
-                label = Label (data_window, text="Empty", width=10, height=5, relief="solid", bg="lightblue")
-
-            label.grid(row=r, column=c, padx=4, pady=4)
+        for r in range(rows, 2 * rows):
+            for c in range(cols):
+                cell_id = grid[r][c]
+                label = Label(
+                    data_window,
+                    text=cell_id if cell_id else "Empty",
+                    width=10,
+                    height=5,
+                    relief="solid",
+                    bg="lightgreen" if cell_id else "lightblue"
+                )
+                if cell_id:  # Only bind the event if the cell is populated
+                    try:
+                        row_data = data.loc[data["id"].astype(str) == str(cell_id)].iloc[0].to_dict()
+                        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+                    except IndexError:
+                        print(f"No data found for ID: {cell_id}")
+                label.grid(row=r + 3, column=c, padx=4, pady=4)
 
     def choose_transport_setup(data):
         setup_window = Toplevel(window)
@@ -100,7 +139,7 @@ def open_frontend():
             btn.pack(pady=3)
 
     #this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
-    #in a pop up window when a populated grid square clicked.
+    #in a pop up window when a populated grid square is clicked.
     def display_manifest_data(row_data):
         popup = Toplevel(window)
         popup.title("Information")
