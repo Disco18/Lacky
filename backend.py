@@ -17,6 +17,23 @@ TRANSPORT_SETUP = {
     "40FT Shipping Container": (1,10)
 }
 
+DG_TYPES = {
+    "Explosives": (1),
+    "Flammable Gas": (2.1),
+    "Non Flammable, Non Toxic": (2.2),
+    "Toxic Gas": (2.3),
+    "Flammable Liquid": (3),
+    "Flammable Solid": (4.1),
+    "Spontaneously Combustible": (4.2),
+    "Dangerous When Wet": (4.3),
+    "Oxidising Agent": (5.1),
+    "Organic Peroxide": (5.2),
+    "Toxic": (6),
+    "Radioactive": (7),
+    "Corrosive": (8),
+    "Miscellaneous Dangerous Goods": (9)
+}
+
 def importManifest(filename, sheet_name="Sheet1"):
     #This function will import the data from the manifest via spreadsheet.
     try:

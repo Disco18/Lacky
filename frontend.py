@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.scrolledtext import ScrolledText
 import backend
+import assigner
 
 #Graphics and display will be coded into this module
 
@@ -32,41 +33,13 @@ def open_frontend():
         Label(newWindow, text="Drag and drop .csv file here!").pack()
         newWindow.bind("<Button-1>", lambda event: (open_file_dialog(), newWindow.destroy()))
 
-    def assign_freight(data, grid_dimensions):
-        rows, cols = grid_dimensions
-        total_cells = rows * cols * 2
-
-        required_columns = ["id", "height", "weight"]
-        if not all(col in data.columns for col in required_columns):
-            print(f"Missing required columns: {set(required_columns) - set(data.columns)}")
-            return [["" for _ in range(cols)] for _ in range(rows * 2)]
-
-        
-        sorted_data = data.sort_values(by=["height", "weight"], ascending=[False, False]).reset_index(drop=True)
-
-        grid = [["" for _ in range(cols)] for _ in range(rows * 2)]
-
-        assigned_data = sorted_data.head(total_cells)
-        for i, (_, row) in enumerate(assigned_data.iterrows()):
-            layer = i // (rows * cols)
-            position = i % (rows * cols)
-            r = position // cols
-            c = cols - 1 - (position % cols) #Assigns from right to left
-
-            grid[r + (layer * rows)][c] = str(row["id"])
-
-        print("Assigned Freight Grid:")
-        for row in grid:
-            print(row)
-
-        return grid
-
     def show_manifest_data(data, grid_dimensions):
         data_window = Toplevel(window)
         data_window.title("Manifest")
 
         rows, cols = grid_dimensions
-        grid = assign_freight(data, grid_dimensions)
+        size_constraints = assigner.generate_size_constraints(rows, cols)
+        grid = assigner.assign_freight(data, grid_dimensions, size_constraints)
 
         print("Grid Dimensions:", len(grid), "rows,", len(grid[0]), "cols")
 
@@ -88,6 +61,7 @@ def open_frontend():
         for r in range(rows):
             for c in range(cols):
                 cell_id = grid[r][c]
+                constraint = size_constraints[r][c]
                 label = Label(
                     data_window,
                     text=cell_id if cell_id else "Empty",
@@ -102,7 +76,7 @@ def open_frontend():
                         label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
-                label.grid(row=r + 1, column=c, padx=4, pady=4)
+                label.grid(row=r + 1, column=c, padx=1, pady=1)
 
         #Passenger grid
         for r in range(rows, 2 * rows):
@@ -122,7 +96,7 @@ def open_frontend():
                         label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
-                label.grid(row=r + 3, column=c, padx=4, pady=4)
+                label.grid(row=r + 3, column=c, padx=1, pady=1)
 
     def choose_transport_setup(data):
         setup_window = Toplevel(window)
@@ -147,16 +121,6 @@ def open_frontend():
         for idx, (col, val) in enumerate(row_data.items()):
             Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
 
-
-
-    #def print_window():
-        #x = window.winfo_rootx()
-        #y = window.winfo_rooty()
-        #w = x + window.winfo_width()
-        #h = y + window.winfo_height()
-
-        #mageGrab.grab().crop((x, y, w, h)).save("window_screenshot.png")
-        #label.config(text"Window screenshot saved as 'window_screenshot.png'!")
 
     button_upload = Button(window, text="Upload Spreadsheet", command=button_upload_clicked)
     button_clp = Button(window, text="Generate Load Plan", command=button_clp_clicked)
