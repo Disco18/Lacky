@@ -33,28 +33,28 @@ def assign_freight(data, grid_dimensions, size_constraints):
         
         assigned_data = sorted_data.head(total_cells)
         for _, row in assigned_data.iterrows():
-            placed = False
-            required_length_cells = int(-(-row["length"] // size_constraints[0][0]["length"]))  # Number of columns needed
-            required_depth_cells = int(-(-row["depth"] // size_constraints[0][0]["depth"]))  # Number of rows needed
+            freight_height = row["height"]
+            freight_length = row["length"]
+            
+            cells_required = max(1, int(freight_length // 1.2))
 
-            for r in range(rows * 2 - required_depth_cells + 1):  # Ensure space for required depth
-                for c in range(cols - required_length_cells + 1):  # Ensure space for required width
+            placed = False
+            for r in range(rows - 1, -1, -1):  # Starts on the bottom row
+                for c in range(cols - cells_required, -1, -1):  # Starts from the right side
                     # Check if the freight fits within the constraints for all required cells
                     if all(
-                        grid[r + dr][c + dc] == ""  # Ensure cells are empty
-                        and size_constraints[r + dr][c + dc]["height"] >= row["height"]
-                        for dr in range(required_depth_cells)
-                        for dc in range(required_length_cells)
+                        grid[r][c + i] == "" and
+                        size_constraints[r][c + i]["height"] >= freight_height and
+                        size_constraints[r][c + i]["length"] >= 1.2
+                        for i in range(cells_required)
                     ):
                         # Allocate the freight to the required spaces
-                        for dr in range(required_depth_cells):
-                            for dc in range(required_length_cells):
-                                grid[r + dr][c + dc] = str(row["id"])
+                        for i in range(cells_required):
+                            grid[r][c + i]= str(row["id"])
                         placed = True
                         break
                 if placed:
                     break
-
             if not placed:
                 print(f"Freight ID {row['id']} could not be placed.")
         
