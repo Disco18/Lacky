@@ -39,14 +39,15 @@ def open_frontend():
 
         rows, cols = grid_dimensions
         size_constraints = assigner.generate_size_constraints(rows, cols)
-        grid = assigner.assign_freight(data, grid_dimensions, size_constraints)
+        assigner.driver_grid, assigner.passenger_grid = assigner.assign_freight(data, grid_dimensions, size_constraints)
 
-        print("Grid Dimensions:", len(grid), "rows,", len(grid[0]), "cols")
+        print("Grid Dimensions:", rows, "rows,", cols, "cols")
 
         #Added a label to tell the user which side of the graph they are viewing.
         #columnspan will make sure that the loading grid is placed below this label.
         ds_label = Label(data_window, text="Driver Side", font=("Ariel", 14, "bold"), fg="darkblue")
         ds_label.grid(row=0, column=0, columnspan=cols, pady=10)
+        
         ps_label = Label(data_window, text="Passenger Side", font=("Arial", 14, "bold"), fg="darkblue")
         ps_label.grid(row=rows + 2, column=0, columnspan=cols, pady=10)
         
@@ -60,8 +61,7 @@ def open_frontend():
         #This should stop the grid creation to the size set in the TRANSPORT_SETUP.
         for r in range(rows):
             for c in range(cols):
-                cell_id = grid[r][c]
-                constraint = size_constraints[r][c]
+                cell_id = assigner.driver_grid[r][c]
                 label = Label(
                     data_window,
                     text=cell_id if cell_id else "Empty",
@@ -79,9 +79,9 @@ def open_frontend():
                 label.grid(row=r + 1, column=c, padx=1, pady=1)
 
         #Passenger grid
-        for r in range(rows, 2 * rows):
+        for r in range(rows):
             for c in range(cols):
-                cell_id = grid[r][c]
+                cell_id = assigner.passenger_grid[r][c]
                 label = Label(
                     data_window,
                     text=cell_id if cell_id else "Empty",
@@ -96,7 +96,7 @@ def open_frontend():
                         label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
-                label.grid(row=r + 3, column=c, padx=1, pady=1)
+                label.grid(row=rows + 3 + r, column=c, padx=1, pady=1)
 
     def choose_transport_setup(data):
         setup_window = Toplevel(window)

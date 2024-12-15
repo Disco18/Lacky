@@ -29,9 +29,12 @@ def assign_freight(data, grid_dimensions, size_constraints):
          # Sorts data by height, width, and weight to prioritize larger and heavier freight.
         sorted_data = data.sort_values(by=["height", "weight", "length"], ascending=[False, False, False]).reset_index(drop=True)
 
-        grid = [["" for _ in range(cols)] for _ in range(rows * 2)]
+        driver_grid = [["" for _ in range(cols)] for _ in range(rows)]
+        passenger_grid = [["" for _ in range(cols)] for _ in range(rows)]
         
         assigned_data = sorted_data.head(total_cells)
+        selected_driver_grid = True
+        
         for _, row in assigned_data.iterrows():
             freight_height = row["height"]
             freight_length = row["length"]
@@ -42,24 +45,33 @@ def assign_freight(data, grid_dimensions, size_constraints):
             for r in range(rows - 1, -1, -1):  # Starts on the bottom row
                 for c in range(cols - cells_required, -1, -1):  # Starts from the right side
                     # Check if the freight fits within the constraints for all required cells
+                    current_grid = driver_grid if selected_driver_grid else passenger_grid
+                    
                     if all(
-                        grid[r][c + i] == "" and
+                        current_grid[r][c + i] == "" and
                         size_constraints[r][c + i]["height"] >= freight_height and
                         size_constraints[r][c + i]["length"] >= 1.2
                         for i in range(cells_required)
                     ):
                         # Allocate the freight to the required spaces
                         for i in range(cells_required):
-                            grid[r][c + i]= str(row["id"])
+                            current_grid[r][c + i]= str(row["id"])
                         placed = True
                         break
                 if placed:
                     break
+
+            selected_driver_grid = not selected_driver_grid
+
             if not placed:
-                print(f"Freight ID {row['id']} could not be placed.")
+                print(f"Freight ID {row['id']} could not be placed due to size constraints")
         
-        print("Assigned Freight Grid:")
-        for row in grid:
+        print("Assigned Freight Grid (Driver Side):")
+        for row in driver_grid:
             print(row)
 
-        return grid
+        print("Assigned Frieght Grid (Passenger Side):")
+        for row in passenger_grid:
+            print(row)
+
+        return driver_grid, passenger_grid
