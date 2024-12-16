@@ -73,7 +73,7 @@ def open_frontend():
                 if cell_id:
                     try:
                         row_data = data.loc[data["id"].astype(str) == str(cell_id)].iloc[0].to_dict()
-                        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+                        add_popup(label, row_data)
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
                 label.grid(row=r + 1, column=c, padx=1, pady=1)
@@ -93,7 +93,7 @@ def open_frontend():
                 if cell_id:  # Only bind the event if the cell is populated
                     try:
                         row_data = data.loc[data["id"].astype(str) == str(cell_id)].iloc[0].to_dict()
-                        label.bind("<Button-1>", lambda e, rd=row_data: display_manifest_data(rd))
+                        add_popup(label, row_data)
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
                 label.grid(row=rows + 3 + r, column=c, padx=1, pady=1)
@@ -113,13 +113,33 @@ def open_frontend():
             btn.pack(pady=3)
 
     #this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
-    #in a pop up window when a populated grid square is clicked.
-    def display_manifest_data(row_data):
-        popup = Toplevel(window)
-        popup.title("Information")
+    #in a pop up window when a populated grid square is hovered over.
+    def add_popup(widget, row_data):
+        popup = None
 
-        for idx, (col, val) in enumerate(row_data.items()):
-            Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
+        def popup_on(event):
+            nonlocal popup
+            if popup is not None:
+                return
+            
+            popup = Toplevel(widget)
+            popup.title("Information")
+            popup.geometry("150x200")
+            popup.transient(widget)
+
+            for idx, (col, val) in enumerate(row_data.items()):
+                Label(popup, text=f"{col}: {val}", anchor="w").grid(row=idx, column=0, padx=10, pady=2, sticky="w")
+
+            popup.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+
+        def popup_off(event):
+            nonlocal popup
+            if popup is not None:
+                popup.destroy()
+                popup = None
+        
+        widget.bind("<Enter>", popup_on)
+        widget.bind("<Leave>", popup_off)
 
 
     button_upload = Button(window, text="Upload Spreadsheet", command=button_upload_clicked)
