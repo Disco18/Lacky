@@ -27,7 +27,7 @@ def login(root, un_entry, ps_entry):
 def run_login():
     root = Tk()
     root.title("Lacky Login")
-    root.geometry("800x500")
+    root.geometry("600x400")
     root.configure(bg="lightgrey")
 
     title_label = Label(root, text="Welcome to Lacky", font=("Arial", 20, "bold"), bg="lightgrey", fg="black")
@@ -45,6 +45,9 @@ def run_login():
 
     login_btn = Button(root, text="Login", font=("Arial", 12), command=lambda: login(root, un_entry, ps_entry))
     login_btn.pack(pady=10)
+
+    button_quit = Button(root, text="Quit", command=root.quit)
+    button_quit.pack(pady=10)
 
     root.mainloop()
 

@@ -10,7 +10,7 @@ import assigner
 def open_frontend():
     window = Tk()
     window.title("Lacky v0.1")
-    window.geometry("600x400")
+    window.geometry("300x200")
 
     def button_clp_clicked():
         print("Please wait while we take the freight and generate a load plan.")
@@ -143,13 +143,13 @@ def open_frontend():
 
 
     button_upload = Button(window, text="Upload Spreadsheet", command=button_upload_clicked)
-    button_clp = Button(window, text="Generate Load Plan", command=button_clp_clicked)
-    button_print = Button(window, text="Print", background="blue", foreground="white")
     button_quit = Button(window, text="Exit", command=window.quit)
+    #button_clp = Button(window, text="Generate Load Plan", command=button_clp_clicked) This button is pretty much mute at this point. Going to keep this here just incase.
+    #button_print = Button(window, text="Print", background="blue", foreground="white")
 
     button_upload.pack(pady=10)
-    button_clp.pack(pady=10)
-    button_print.pack(pady=10)
+    #button_clp.pack(pady=10)
+    #button_print.pack(pady=10)
     button_quit.pack(pady=10)
 
 
