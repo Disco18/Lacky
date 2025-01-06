@@ -112,6 +112,13 @@ def open_frontend():
             )
             btn.pack(pady=3)
 
+    def settings_window():
+        settings_window = Toplevel(window)
+        settings_window.title("Settings")
+        settings_window.geometry("400x600")
+
+        Label(settings_window, text="Settings window (WIP)").pack(pady=10)
+
     #this will display the other details accosiated with the imported data. e.g (length,height,dg ect..)
     #in a pop up window when a populated grid square is hovered over.
     def add_popup(widget, row_data):
@@ -141,13 +148,14 @@ def open_frontend():
         widget.bind("<Enter>", popup_on)
         widget.bind("<Leave>", popup_off)
 
-
+    button_settings = Button(window, text="Settings", command=settings_window)
     button_upload = Button(window, text="Upload Spreadsheet", command=button_upload_clicked)
     button_quit = Button(window, text="Exit", command=window.quit)
     #button_clp = Button(window, text="Generate Load Plan", command=button_clp_clicked) This button is pretty much mute at this point. Going to keep this here just incase.
     #button_print = Button(window, text="Print", background="blue", foreground="white")
 
     button_upload.pack(pady=10)
+    button_settings.pack(pady=10)
     #button_clp.pack(pady=10)
     #button_print.pack(pady=10)
     button_quit.pack(pady=10)
