@@ -39,7 +39,7 @@ def open_frontend():
 
         rows, cols = grid_dimensions
         size_constraints = assigner.generate_size_constraints(rows, cols)
-        assigner.driver_grid, assigner.passenger_grid = assigner.assign_freight(data, grid_dimensions, size_constraints)
+        assigner.driver_grid, assigner.passenger_grid, assigner.unplaced_freight = assigner.assign_freight(data, grid_dimensions, size_constraints)
 
         print("Grid Dimensions:", rows, "rows,", cols, "cols")
 
@@ -50,6 +50,9 @@ def open_frontend():
         
         ps_label = Label(data_window, text="Passenger Side", font=("Arial", 14, "bold"), fg="darkblue")
         ps_label.grid(row=rows + 2, column=0, columnspan=cols, pady=10)
+
+        up_label = Label(data_window, text="Unplaced Freight", font=("Arial", 14, "bold"), fg="darkblue")
+        up_label.grid(row=rows + 5, column=0, columnspan=cols, pady=10)
         
         if 'id' not in data.columns:
             Label(data_window, text="No 'id' column found in the spreadsheet.").pack()
@@ -65,7 +68,7 @@ def open_frontend():
                 label = Label(
                     data_window,
                     text=cell_id if cell_id else "Empty",
-                    width=10,
+                    width=12,
                     height=5,
                     relief="solid",
                     bg="lightgreen" if cell_id else "lightblue"
@@ -85,7 +88,7 @@ def open_frontend():
                 label = Label(
                     data_window,
                     text=cell_id if cell_id else "Empty",
-                    width=10,
+                    width=12,
                     height=5,
                     relief="solid",
                     bg="lightgreen" if cell_id else "lightblue"
@@ -97,6 +100,11 @@ def open_frontend():
                     except IndexError:
                         print(f"No data found for ID: {cell_id}")
                 label.grid(row=rows + 3 + r, column=c, padx=1, pady=1)
+
+        #Unplaced freight list
+        for i, items in enumerate(assigner.unplaced_freight):
+            label = Label(data_window, text=items['id'], width=12, height=4, relief="solid", bg="lightblue")
+            label.grid(row=rows + 6 + (i // cols), column=i % cols, padx=1, pady=1)
 
     def choose_transport_setup(data):
         setup_window = Toplevel(window)
