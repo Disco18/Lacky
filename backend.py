@@ -1,13 +1,16 @@
 #the backend will be where all the logic happens to make Lacky work
-import sys
-import tkinter
 from tkinter import filedialog
 import pandas as pd
 
 #Define the size for each transport setup.
+# For multi-trailer configs, use list of (rows, cols) tuples: [(A_trailer), (B_trailer), ...]
+# Single trailer configs use single tuple (rows, cols)
 
 TRANSPORT_SETUP = {
-    "Linehaul (A+B Trailers)": (2,11),
+    "Linehaul B-Double (A+B Trailers)": [(2, 6), (2, 11)],  # A trailer (2x6) + B trailer (2x11)
+    "Linehaul Road Train (B+B Trailers)": [(2, 11), (2, 11)],  # B trailer + B trailer
+    "Linehaul Semi (B Trailer Only)": (2, 11),
+    "Pantech (24)": (1, 12),
     "PUD Truck (14)": (1,7),
     "PUD Truck (14) with Mezz": (2, 7),
     "PUD Truck (16)": (1,8),

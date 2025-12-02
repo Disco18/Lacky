@@ -8,6 +8,10 @@ Initially, Lacky will display load configurations on a 2D grid, with future plan
 
 With secure account sign-on and load plan storage for up to 12 months, Lacky provides a dependable, long-term planning tool. Compatible with tablets, laptops, PCs, and phones, Lacky meets diverse operational needs across multiple devices, making it a highly adaptable solution for today’s fast-paced logistics environments.
 
+Next In Store
+
+Development has slowed off but with the holiday period around the corner, I have gotten back on the train and we are full steam ahead. With that said, I have started working on some more features and further improving the planning logic and started putting together a development roadmap. Once the roadmap is complete I will release a copy of it through a link.
+
 IMPORTANT
 -------------------------------------------------------------------------------------------------------------------------
 Community Collaboration and Access
@@ -16,3 +20,9 @@ Lacky is currently in a private testing phase and is open to community-driven de
 
 In appreciation of your support, anyone actively involved in Lacky’s development will receive a copy of the program upon release. Join us in shaping Lacky into the ultimate load optimization tool for the logistics community!
 -------------------------------------------------------------------------------------------------------------------------
+
+HOW TO RUN
+-------------------------------------------------------------------------------------------------------------------------
+1. Make sure you have Python installed.
+2. Run 'pip install -r requirements.txt' in the console of your IDE.
+3. Select the main.py file and click play in your IDE.
